@@ -1,17 +1,19 @@
-page 60301 ItemAttributes
+page 60301 ItemAttributesApi
 {
     PageType = API;
-    Caption = 'itemAttributes';
+    Caption = 'Item Attributes';
     APIPublisher = 'sabina';
     APIGroup = 'guineaPig';
     APIVersion = 'v1.0';
     EntityName = 'itemAttribute';
     EntitySetName = 'itemAttributes';
+
     SourceTable = "Item Attribute Value Mapping";
-    DelayedInsert = true;
-    InsertAllowed = true;
-    ModifyAllowed = true;
-    DeleteAllowed = true;
+
+    // Read-only API
+    InsertAllowed = false;
+    ModifyAllowed = false;
+    DeleteAllowed = false;
 
     layout
     {
@@ -19,22 +21,26 @@ page 60301 ItemAttributes
         {
             repeater(ItemAttributes)
             {
-                field("No"; Rec."No.")
+                field(ItemNo; Rec."No.")
                 {
-                    Caption = 'No';
+                    Caption = 'Item No';
                 }
-                field("ItemAttributeID"; Rec."Item Attribute ID")
+
+                field(AttributeName; AttributeNameTxt)
                 {
-                    Caption = 'Item Attribute ID';
+                    Caption = 'Attribute Name';
                 }
-                field("ItemAttributeValueID"; Rec."Item Attribute Value ID")
+
+                field(AttributeValue; AttributeValueTxt)
                 {
-                    Caption = 'Item Attribute Value ID';
+                    Caption = 'Attribute Value';
                 }
+
                 field(SystemId; Rec.SystemId)
                 {
                     Caption = 'System Id';
                 }
+
                 field(SystemCreatedAt; Rec.SystemCreatedAt)
                 {
                     Caption = 'System Created At';
@@ -44,8 +50,33 @@ page 60301 ItemAttributes
                 {
                     Caption = 'System Modified At';
                 }
-
             }
         }
     }
+
+    var
+        AttributeNameTxt: Text[250];
+        AttributeValueTxt: Text[250];
+
+    trigger OnAfterGetRecord()
+    var
+        ItemAttribute: Record "Item Attribute";
+        ItemAttributeValue: Record "Item Attribute Value";
+    begin
+        // Attribute name (from Item Attribute table)
+        Clear(AttributeNameTxt);
+        if Rec."Item Attribute ID" <> 0 then
+            if ItemAttribute.Get(Rec."Item Attribute ID") then
+                AttributeNameTxt := ItemAttribute.Name;
+
+        // Attribute value (actual text value from Item Attribute Value table)
+        Clear(AttributeValueTxt);
+        if (Rec."Item Attribute ID" <> 0) and
+           (Rec."Item Attribute Value ID" <> 0) then
+            if ItemAttributeValue.Get(
+                Rec."Item Attribute ID",
+                Rec."Item Attribute Value ID")
+            then
+                AttributeValueTxt := ItemAttributeValue.Value;
+    end;
 }
