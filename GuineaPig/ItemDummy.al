@@ -25,9 +25,13 @@ page 60300 ItemDummy
                 {
                     Caption = 'Description';
                 }
-                field("Base Unit of Measure"; Rec."Base Unit of Measure")
+                field("Description2"; Rec."Description 2")
                 {
-                    Caption = 'Base Unit of Measure';
+                    Caption = 'Description 2';
+                }
+                field("ItemCategoryCode"; Rec."Item Category Code")
+                {
+                    Caption = 'Item Category Code';
                 }
             }
         }
