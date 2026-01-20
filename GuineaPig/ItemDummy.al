@@ -25,9 +25,12 @@ page 60300 ItemDummy
                 {
                     Caption = 'Description';
                 }
+                field("Base Unit of Measure"; Rec."Base Unit of Measure")
+                {
+                    Caption = 'Base Unit of Measure';
+                }
             }
         }
     }
-}
 
 // test comment
