@@ -1,4 +1,4 @@
-name: ' Create release'
+name: " Create release"
 run-name: "Create release - Version ${{ inputs.tag }}"
 
 concurrency:
@@ -10,15 +10,15 @@ on:
       buildVersion:
         description: Build version to promote to release (default is latest)
         required: false
-        default: 'latest'
+        default: "latest"
       name:
         description: Name of this release
         required: true
-        default: ''
+        default: ""
       tag:
         description: Tag of this release (needs to be semantic version string https://semver.org, ex. 1.0.0)
         required: true
-        default: ''
+        default: ""
       releaseType:
         description: Release, prerelease or draft?
         type: choice
@@ -36,9 +36,9 @@ on:
         type: string
         default: release/
       updateVersionNumber:
-        description: New Version Number in main branch. Use Major.Minor (optionally add .Build for versioningstrategy 3) for absolute change, or +1, +0.1 (or +0.0.1 for versioningstrategy 3) incremental change.
+        description: New Version Number in master branch. Use Major.Minor (optionally add .Build for versioningstrategy 3) for absolute change, or +1, +0.1 (or +0.0.1 for versioningstrategy 3) incremental change.
         required: false
-        default: ''
+        default: ""
       skipUpdatingDependencies:
         description: Skip updating dependency version numbers in all apps.
         type: boolean
@@ -68,8 +68,8 @@ env:
 
 jobs:
   CreateRelease:
-    needs: [ ]
-    runs-on: [ windows-latest ]
+    needs: []
+    runs-on: [windows-latest]
     outputs:
       artifacts: ${{ steps.determineArtifactsForRelease.outputs.artifacts }}
       releaseId: ${{ steps.createrelease.outputs.releaseId }}
@@ -110,8 +110,8 @@ jobs:
         with:
           shell: powershell
           gitHubSecrets: ${{ toJson(secrets) }}
-          getSecrets: 'TokenForPush,ghTokenWorkflow'
-          useGhTokenWorkflowForPush: '${{ github.event.inputs.useGhTokenWorkflow }}'
+          getSecrets: "TokenForPush,ghTokenWorkflow"
+          useGhTokenWorkflowForPush: "${{ github.event.inputs.useGhTokenWorkflow }}"
 
       - name: Determine Projects
         id: determineProjects
@@ -179,8 +179,8 @@ jobs:
             core.setOutput('releaseId', releaseId);
 
   UploadArtifacts:
-    needs: [ CreateRelease ]
-    runs-on: [ windows-latest ]
+    needs: [CreateRelease]
+    runs-on: [windows-latest]
     name: Upload ${{ matrix.name }}
     strategy:
       matrix: ${{ fromJson(needs.CreateRelease.outputs.artifacts) }}
@@ -200,8 +200,8 @@ jobs:
         with:
           shell: powershell
           gitHubSecrets: ${{ toJson(secrets) }}
-          getSecrets: 'nuGetContext,storageContext,TokenForPush'
-          useGhTokenWorkflowForPush: '${{ github.event.inputs.useGhTokenWorkflow }}'
+          getSecrets: "nuGetContext,storageContext,TokenForPush"
+          useGhTokenWorkflowForPush: "${{ github.event.inputs.useGhTokenWorkflow }}"
 
       - name: Download artifact
         env:
@@ -243,37 +243,37 @@ jobs:
         uses: microsoft/AL-Go-Actions/Deliver@v8.1
         if: ${{ fromJson(steps.ReadSecrets.outputs.Secrets).nuGetContext != '' }}
         env:
-          Secrets: '${{ steps.ReadSecrets.outputs.Secrets }}'
+          Secrets: "${{ steps.ReadSecrets.outputs.Secrets }}"
         with:
           shell: powershell
-          type: 'Release'
+          type: "Release"
           projects: ${{ matrix.project }}
-          deliveryTarget: 'NuGet'
+          deliveryTarget: "NuGet"
           artifacts: ${{ github.event.inputs.buildVersion }}
-          atypes: 'Apps,TestApps'
+          atypes: "Apps,TestApps"
 
       - name: Deliver to Storage
         uses: microsoft/AL-Go-Actions/Deliver@v8.1
         if: ${{ fromJson(steps.ReadSecrets.outputs.Secrets).storageContext != '' }}
         env:
-          Secrets: '${{ steps.ReadSecrets.outputs.Secrets }}'
+          Secrets: "${{ steps.ReadSecrets.outputs.Secrets }}"
         with:
           shell: powershell
-          type: 'Release'
+          type: "Release"
           projects: ${{ matrix.project }}
-          deliveryTarget: 'Storage'
+          deliveryTarget: "Storage"
           artifacts: ${{ github.event.inputs.buildVersion }}
-          atypes: 'Apps,TestApps,Dependencies'
+          atypes: "Apps,TestApps,Dependencies"
 
   CreateReleaseBranch:
-    needs: [ CreateRelease, UploadArtifacts ]
+    needs: [CreateRelease, UploadArtifacts]
     if: ${{ github.event.inputs.createReleaseBranch=='true' }}
-    runs-on: [ windows-latest ]
+    runs-on: [windows-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
-          ref: '${{ needs.createRelease.outputs.commitish }}'
+          ref: "${{ needs.createRelease.outputs.commitish }}"
 
       - name: Create Release Branch
         env:
@@ -289,9 +289,9 @@ jobs:
           git push origin $releaseBranch
 
   UpdateVersionNumber:
-    needs: [ CreateRelease, UploadArtifacts ]
+    needs: [CreateRelease, UploadArtifacts]
     if: ${{ github.event.inputs.updateVersionNumber!='' }}
-    runs-on: [ windows-latest ]
+    runs-on: [windows-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
@@ -307,8 +307,8 @@ jobs:
         with:
           shell: powershell
           gitHubSecrets: ${{ toJson(secrets) }}
-          getSecrets: 'TokenForPush'
-          useGhTokenWorkflowForPush: '${{ github.event.inputs.useGhTokenWorkflow }}'
+          getSecrets: "TokenForPush"
+          useGhTokenWorkflowForPush: "${{ github.event.inputs.useGhTokenWorkflow }}"
 
       - name: Update Version Number
         uses: microsoft/AL-Go-Actions/IncrementVersionNumber@v8.1
@@ -320,9 +320,10 @@ jobs:
           directCommit: ${{ github.event.inputs.directCommit }}
 
   PostProcess:
-    needs: [ CreateRelease, UploadArtifacts, CreateReleaseBranch, UpdateVersionNumber ]
+    needs:
+      [CreateRelease, UploadArtifacts, CreateReleaseBranch, UpdateVersionNumber]
     if: always()
-    runs-on: [ windows-latest ]
+    runs-on: [windows-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
