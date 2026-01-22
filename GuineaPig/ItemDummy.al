@@ -37,6 +37,10 @@ page 60300 ItemDummy
                 {
                     Caption = 'System Id';
                 }
+                field("BaseUnitofMeasure"; Rec."Base Unit of Measure")
+                {
+                    Caption = 'Base Unit of Measure';
+                }
             }
         }
     }
