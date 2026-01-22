@@ -33,6 +33,10 @@ page 60300 ItemDummy
                 {
                     Caption = 'Item Category Code';
                 }
+                field(SystemId; Rec.SystemId)
+                {
+                    Caption = 'System Id';
+                }
             }
         }
     }
